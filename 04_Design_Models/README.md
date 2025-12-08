@@ -1,5 +1,6 @@
 # This is ERD.
 
+``` mermaid
 erDiagram
     %% CORE IDENTITY %%
     User {
@@ -123,3 +124,4 @@ erDiagram
     Shift ||--o{ ShiftApplication : "receives (1:N)"
     Shift ||--o{ TimeLog : "generates (1:N)"
     OrgMember ||--o{ TimeLog : "verifies (1:N)"
+```
