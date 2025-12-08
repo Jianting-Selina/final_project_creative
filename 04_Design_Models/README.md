@@ -1,7 +1,7 @@
 
 # Some Design Models
 
-## 1. Entity Relationship Diagram (ERD)
+## 11.2 Entity Relationship Diagram (ERD)
 
 ``` mermaid
 erDiagram
@@ -129,7 +129,7 @@ erDiagram
     OrgMember ||--o{ TimeLog : "verifies (1:N)"
 ```
 
-## 2. Class Diagram (CD)
+## 13. Class Diagram Class Diagram (CD)
 ``` mermaid
 classDiagram
     %% =======================
