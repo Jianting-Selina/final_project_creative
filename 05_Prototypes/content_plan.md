@@ -1,4 +1,6 @@
 12.1 Screen 1: The "Discovery Dashboard" (Home)
+![home](homepage.png)
+
 
 Header: "Good Morning, [Name]!" with a progress bar showing "22/40 Hours" (gamification).
 Smart Filter Control: A horizontal scroll of chips: "My Skills" (matches user profile), "Near Me" (<5km), "This Weekend".
@@ -8,6 +10,8 @@ Navigation: Bottom bar with.
 
 
 12.2 Screen 2: The "Active Shift" (Geofence Triggered)
+![location](location.png)
+
 
 Context: This screen appears when the user taps the "You have arrived" notification.
 Visuals: A map view centered on the user's location relative to the Event Geofence (visual confirmation).
@@ -17,6 +21,7 @@ Fallback: A small link text "GPS not working? Scan QR Code" below the slider.
 
 12.3 Screen 3: The "Certificate Generator"
 
+![certificategenetator](certificategenetator.png)
 Context: Accessed via Profile -> My Records.
 Input Controls:
 Date Range Picker: "Start Date" to "End Date".
