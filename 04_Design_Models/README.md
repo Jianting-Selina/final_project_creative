@@ -1,4 +1,7 @@
-# This is ERD.
+
+# Design Models
+
+## 1. Entity Relationship Diagram (ERD)
 
 ``` mermaid
 erDiagram
@@ -124,4 +127,230 @@ erDiagram
     Shift ||--o{ ShiftApplication : "receives (1:N)"
     Shift ||--o{ TimeLog : "generates (1:N)"
     OrgMember ||--o{ TimeLog : "verifies (1:N)"
+```
+
+## 2. Class Diagram (CD)
+``` mermaid
+classDiagram
+    %% =======================
+    %% 1. CORE IDENTITY & ROLES
+    %% =======================
+    class User {
+        +UUID userID
+        -String email
+        -String passwordHash
+        +Boolean isActive
+        +login(pwd: String) Boolean
+        +changePassword(old: String, new: String)
+    }
+
+    class Volunteer {
+        +UUID volunteerID
+        +UUID userID
+        -Text bio
+        -Float totalVerifiedHours
+        -Enum bgCheckStatus
+        +updateProfile(data: Map)
+        +addSkill(skill: Skill, level: Proficiency)
+        +applyForShift(shift: Shift) ShiftApplication
+        +getCertificateHistory() List~Certificate~
+    }
+
+    class OrgMember {
+        +UUID memberID
+        +UUID userID
+        +UUID orgID
+        +Enum role
+        +verifyLog(log: TimeLog, decision: Boolean)
+        +manageEvent(event: Event)
+    }
+
+    %% =======================
+    %% 2. UTILITIES (Value Objects)
+    %% =======================
+    class GeoPoint {
+        <<Value Object>>
+        -Double latitude
+        -Double longitude
+        -Float accuracyMetres
+        -String provider
+        +GeoPoint(lat, lon)
+        +distanceTo(other: GeoPoint) Float
+        +isValid() Boolean
+        +isMockLocation() Boolean
+        +toWKT() String
+    }
+
+    %% =======================
+    %% 3. ORGANIZATION & EVENTS
+    %% =======================
+    class Organization {
+        +UUID orgID
+        +String name
+        +String regNumber
+        +Enum verificationStatus
+        +recruitMember(user: User, role: Enum)
+        +issueCertificate(vol: Volunteer) Certificate
+    }
+
+    class Event {
+        +UUID eventID
+        +UUID orgID
+        +String title
+        -GeoPoint location
+        -Int geofenceRadius
+        -JSON settings
+        +addSkillRequirement(skill: Skill, isMandatory: Boolean)
+        +isUserInGeofence(userLoc: GeoPoint) Boolean
+        +getAvailableShifts() List~Shift~
+    }
+
+    %% =======================
+    %% 4. SKILLS TAXONOMY
+    %% =======================
+    class Skill {
+        +Int skillID
+        +String name
+    }
+
+    class VolunteerSkill {
+        +Int skillID
+        +UUID volunteerID
+        +Enum proficiency
+    }
+
+    class EventSkill {
+        +Int skillID
+        +UUID eventID
+        +Boolean isMandatory
+    }
+
+    %% =======================
+    %% 5. OPERATIONAL LOOP
+    %% =======================
+    class Shift {
+        +UUID shiftID
+        +DateTime startTime
+        +DateTime endTime
+        -Int capacity
+        -Int filledCount
+        +isFull() Boolean
+        +reserveSpot() Boolean
+    }
+
+    class ShiftApplication {
+        +UUID appID
+        +UUID shiftID
+        +UUID volunteerID
+        +Enum status
+        +approve()
+        +reject(reason: String)
+    }
+
+    class TimeLog {
+        +UUID logID
+        +DateTime checkInTime
+        -GeoPoint checkInLocation
+        +Enum anomalyFlag
+        +UUID verifiedByMemberID
+        +calculateDuration() Float
+        +detectAnomaly(eventGeo: GeoPoint, radius: Int) Boolean
+        +markVerified(member: OrgMember)
+    }
+
+    class Certificate {
+        +UUID certID
+        +String uniqueHash
+        +String pdfUrl
+        +DateTime generatedDate
+        +validateHash() Boolean
+        +download() File
+    }
+
+    %% =======================
+    %% RELATIONSHIP DEFINITIONS
+    %% =======================
+    
+    %% User Roles (Composition)
+    User "1" --> "0..1" Volunteer : Has Profile
+    User "1" --> "0..n" OrgMember : Works As
+
+    %% Organization Structure
+    Organization "1" o-- "n" OrgMember : Employs
+    Organization "1" *-- "n" Event : Hosts
+
+    %% Event Structure
+    Event "1" *-- "n" Shift : Contains
+    Event "1" o-- "n" EventSkill : Requires
+    Event *-- "1" GeoPoint : Located At
+
+    %% Volunteer Behavior
+    Volunteer "1" o-- "n" VolunteerSkill : Possesses
+    Volunteer "1" --> "n" ShiftApplication : Submits
+    Volunteer "1" --> "n" TimeLog : Generates
+    
+    %% Skill References
+    EventSkill --> Skill : References
+    VolunteerSkill --> Skill : References
+
+    %% Business Flow
+    Shift "1" --> "n" ShiftApplication : Receives
+    Shift "1" --> "n" TimeLog : Tracks
+    
+    %% Verification & Geo Logic
+    TimeLog *-- "1" GeoPoint : Captured At
+    OrgMember ..> TimeLog : Verifies
+    
+    %% Output
+    Certificate ..> Volunteer : Awards to
+    Certificate ..> Organization : Issued by
+    
+    %% Permission Enums
+    class Role {
+        <<enumeration>>
+        OWNER
+        ADMIN
+        STAFF
+    }
+    
+    class VerificationStatus {
+        <<enumeration>>
+        UNVERIFIED
+        PENDING
+        VERIFIED
+        SUSPENDED
+    }
+
+    %% Process Enums
+    class ShiftAppStatus {
+        <<enumeration>>
+        PENDING
+        APPROVED
+        REJECTED
+        CANCELLED
+        WAITLISTED
+    }
+
+    class AnomalyFlag {
+        <<enumeration>>
+        NONE
+        GEO_MISMATCH
+        DEVICE_MOCK
+        TIME_MISMATCH
+    }
+
+    %% Attribute Enums
+    class Proficiency {
+        <<enumeration>>
+        BEGINNER
+        INTERMEDIATE
+        EXPERT
+    }
+
+    %% Relationships illustrating usage
+    OrgMember ..> Role
+    Organization ..> VerificationStatus
+    ShiftApplication ..> ShiftAppStatus
+    TimeLog ..> AnomalyFlag
+    VolunteerSkill ..> Proficiency
 ```
