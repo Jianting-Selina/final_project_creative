@@ -1,5 +1,5 @@
 
-# Design Models
+# Some Design Models
 
 ## 1. Entity Relationship Diagram (ERD)
 
